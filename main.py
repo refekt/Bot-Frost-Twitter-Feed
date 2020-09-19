@@ -136,7 +136,7 @@ class TTD(commands.Bot):
         await client.logout()
 
 
-env_file = "vars.json"
+env_file = "./vars.json"
 
 if not path.exists("key.key"):
     encrypt.write_key()
