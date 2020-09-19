@@ -130,6 +130,11 @@ class TTD(commands.Bot):
 
         await self.start_twitter_stream()
 
+    @commands.command(aliases=["q"])
+    async def quit(ctx):
+        print("Quiting...")
+        await client.logout()
+
 
 env_file = "vars.json"
 
@@ -143,8 +148,7 @@ else:
 env_vars = encrypt.decrypt_return_data(env_file, key)
 
 client = TTD(
-    command_prefix="+++",
+    command_prefix="+",
 )
 
 client.run(env_vars["DISCORD_TOKEN"])
-print("aa")
