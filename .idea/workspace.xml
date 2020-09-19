@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b3ad3966-45fb-4664-b42d-a2f6b6c6c61a" name="Default Changelist" comment="" />
+    <list default="true" id="b3ad3966-45fb-4664-b42d-a2f6b6c6c61a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../Bot Frost Twitter Feed/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Bot Frost Twitter Feed/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Bot Frost Twitter Feed/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Bot Frost Twitter Feed/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Bot Frost Twitter Feed/twitter_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Bot Frost Twitter Feed/twitter_v2.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,7 +18,11 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../Bot Frost Twitter Feed" />
+  </component>
   <component name="ProjectId" id="1hWNYmsygzjoZhM9rVG1hWz27KG" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -24,7 +32,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../Bot Frost" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -194,6 +202,11 @@
     </task>
     <servers />
   </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$" />
+    </ignored-roots>
+  </component>
   <component name="WindowStateProjectService">
     <state x="-1368" y="178" key="#Inspections" timestamp="1600471903299">
       <screen x="-1920" y="0" width="1920" height="1040" />
@@ -224,11 +237,11 @@
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
     <state x="-744" y="0" width="688" height="1040" key="#xdebugger.XInspectDialog/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1600302897259" />
-    <state x="-1180" y="275" key="FileChooserDialogImpl" timestamp="1600481042942">
-      <screen x="-1920" y="0" width="1920" height="1040" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1600558297069">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="-1180" y="275" key="FileChooserDialogImpl/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1600481042942" />
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1600458414610" />
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1600558297069" />
     <state x="0" y="0" key="FileDocumentManager.FileCacheConflict" timestamp="1600302829008">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -273,11 +286,11 @@
     </state>
     <state width="960" height="912" key="GridCell.Tab.1.right/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1600482699599" />
     <state width="960" height="602" key="GridCell.Tab.1.right/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1600557844053" />
-    <state x="763" y="227" key="SettingsEditor" timestamp="1600557866107">
+    <state x="170" y="227" key="SettingsEditor" timestamp="1600558316493">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="-1157" y="227" key="SettingsEditor/0.0.1920.1040/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1600480575008" />
-    <state x="763" y="227" key="SettingsEditor/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1600557866107" />
+    <state x="170" y="227" key="SettingsEditor/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1600558316493" />
     <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1600301857186">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

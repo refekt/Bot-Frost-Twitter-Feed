@@ -1,10 +1,11 @@
-import asyncio
 from datetime import datetime
 from os import path
 
 import discord
-import twitter
 from discord.ext import commands
+from twitter import Twitter
+from twitter.oauth import OAuth
+from twitter.stream import TwitterStream, Timeout, HeartbeatTimeout, Hangup
 
 import encrypt
 
@@ -14,106 +15,120 @@ class TTD(commands.Bot):
     def __init__(self, command_prefix, **options):
         super().__init__(command_prefix, **options)
         self.nebraska_twitter_list_id = 1223689242896977922
+        self.timeout = 90
+        self.no_block = True
+        self.heartbeat_timeout = 90
 
     def initiate_twitter_api(self):
-        return twitter.Api(
-            consumer_key=env_vars["TWITTER_CONSUMER_KEY"],
-            consumer_secret=env_vars["TWITTER_CONSUMER_SECRET"],
-            access_token_key=env_vars["TWITTER_TOKEN_KEY"],
-            access_token_secret=env_vars["TWITTER_TOKEN_SECRET"]
+        return OAuth(
+            env_vars["TWITTER_TOKEN_KEY"],
+            env_vars["TWITTER_TOKEN_SECRET"],
+            env_vars["TWITTER_CONSUMER_KEY"],
+            env_vars["TWITTER_CONSUMER_SECRET"]
         )
 
     async def start_twitter_stream(self):
 
-        api = self.initiate_twitter_api()
+        # When using twitter stream you must authorize.
+        auth = self.initiate_twitter_api()
 
-        list = api.GetListMembers(
-            list_id=self.nebraska_twitter_list_id
+        # These arguments are optional:
+        stream_args = dict(
+            timeout=self.timeout,
+            block=not self.no_block,
+            heartbeat_timeout=self.heartbeat_timeout
         )
 
-        list_ids = []
-        track_terms = []
-
-        for member in list:
-            list_ids.append(member.id_str)
-
-        track_terms.extend(
-            []  # ["gbr", "huskers", "@siryacht"]
+        twitter = Twitter(
+            auth=auth
         )
 
-        twitter_stream = api.GetStreamFilter(
-            follow=list_ids,
-            # track=track_terms,
-            languages=["en"]
-        )
+        # https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter
+        # https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/guides/basic-stream-parameters
+
+        husker_list = twitter.lists.members(owner_screen_name="ayy_gbr", slug="Nebraska-Football-Coaches")
+
+        # A comma separated list of user IDs, indicating the users to return statuses for in the stream. See follow for more information.
+        follow = []
+        for member in husker_list['users']:
+            follow.append(member["id_str"])
+        follow_str = ",".join(follow)
+
+        query_args = dict()
+        query_args["follow"] = follow_str
+
+        # Keywords to track. Phrases of keywords are specified by a comma-separated list. See track for more information.
+        query_args["track"] = "#huskers #gbr #b1g #bigten"
+
+        query_args["language"] = "en"
+
+        stream = TwitterStream(auth=auth, **stream_args)
+        tweet_iter = stream.statuses.filter(**query_args)
 
         chan = client.get_channel(636220560010903584)
 
-        while True:
-            try:
-                for index, tweet in enumerate(twitter_stream):
-                    print(f"Tweet #{index}...")
-                    # Only pass tweets from uesrs in the list
-                    if not tweet['user']['id_str'] in list_ids:
-                        print(f"[{index}]: Skipping tweet!")
-                        # print(f"[{index}]: Skipping tweet from {tweet['user']['name']} (@{tweet['user']['screen_name']})!")
-                        continue
+        del husker_list, member, follow, query_args
 
-                    try:
-                        dt = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
-                    except KeyError:
-                        dt = datetime.now()
+        print("Waiting for a tweet...")
 
-                    tweet_embed = discord.Embed(
-                        title=f"Bot Frost Twitter Feed #GBR",
-                        color=0xD00000,
-                        timestamp=dt
-                    )
-                    tweet_embed.add_field(
-                        name="Tweet",
-                        value=tweet["text"],
-                        inline=False
-                    )
-                    tweet_embed.add_field(
-                        name="Link",
-                        value=f"https://twitter.com/{tweet['user']['screen_name']}/status/{tweet['id']}",
-                        inline=False
-                    )
-                    tweet_embed.set_author(
-                        name=f"{tweet['user']['name']} (@{tweet['user']['screen_name']})",
-                        icon_url=tweet['user']['profile_image_url']
-                    )
-                    tweet_embed.set_footer(
-                        text=f"{dt.strftime('%B %d, %Y at %H:%M%p')} | 🎈 = General 🌽 = Scott's Tots",
-                        icon_url="https://i.imgur.com/Ah3x5NA.png"
-                    )
+        for tweet in tweet_iter:
 
-                    # print(f"Sending a tweet from [@{tweet['user']['screen_name']}] [https://twitter.com/{tweet['user']['screen_name']}/status/{tweet['id']}].")
-                    tweet_message = await chan.send(embed=tweet_embed)
-                    reactions = ("🎈", "🌽")
-                    for reaction in reactions:
-                        await tweet_message.add_reaction(reaction)
+            if tweet is None:
+                print("-- None --")
+            elif tweet is Timeout:
+                print("-- Timeout --")
+            elif tweet is HeartbeatTimeout:
+                print("-- Heartbeat Timeout --")
+            elif tweet is Hangup:
+                print("-- Hangup --")
+            elif tweet.get('text'):
 
-                    # Attempt to avoid rate limiting
-                    await asyncio.sleep(60 * 5)
-            except twitter.error.TwitterError:
-                delay = 60 * 60 * 2
+                if not tweet['user']['id_str'] in follow_str:
+                    continue
 
-                # Attempt to pause for awhile
-                print(f"{datetime.now()}: A Twitter Timeout Error occurred. Sleeping for {delay} seconds.")
-                await asyncio.sleep(delay=delay)
-                print(f"{datetime.now()}: Sleeping done. Resuming.")
-                continue
+                print("Sending a tweet!")
+
+                try:
+                    dt = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
+                except KeyError:
+                    dt = datetime.now()
+
+                tweet_embed = discord.Embed(
+                    title=f"Bot Frost Twitter Feed #GBR",
+                    color=0xD00000,
+                    timestamp=dt
+                )
+                tweet_embed.add_field(
+                    name="Tweet",
+                    value=tweet["text"],
+                    inline=False
+                )
+                tweet_embed.add_field(
+                    name="Link",
+                    value=f"https://twitter.com/{tweet['user']['screen_name']}/status/{tweet['id']}",
+                    inline=False
+                )
+                tweet_embed.set_author(
+                    name=f"{tweet['user']['name']} (@{tweet['user']['screen_name']})",
+                    icon_url=tweet['user']['profile_image_url']
+                )
+                tweet_embed.set_footer(
+                    text=f"{dt.strftime('%B %d, %Y at %H:%M%p')} | 🎈 = General 🌽 = Scott's Tots",
+                    icon_url="https://i.imgur.com/Ah3x5NA.png"
+                )
+
+                tweet_message = await chan.send(embed=tweet_embed)
+                reactions = ("🎈", "🌽")
+                for reaction in reactions:
+                    await tweet_message.add_reaction(reaction)
+
+            else:
+                print("-- Some data: " + str(tweet))
 
     async def on_ready(self):
         print("Starting the Twitter stream.")
-        task = asyncio.create_task(self.start_twitter_stream())
-        try:
-            await task
-        except asyncio.TimeoutError:
-            print(f"{datetime.now()}: Twitter Stream returned Timeout Error")
 
-        print("The Twitter stream has started.")
+        await self.start_twitter_stream()
 
 
 env_file = "vars.json"

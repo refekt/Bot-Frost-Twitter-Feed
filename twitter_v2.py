@@ -65,17 +65,14 @@ class TTD(commands.Bot):
         stream = TwitterStream(auth=auth, **stream_args)
         tweet_iter = stream.statuses.filter(**query_args)
 
-        chan = client.get_channel(636220560010903584)  # Prod
-        # chan = client.get_channel(595705205069185047)  # Test
+        chan = client.get_channel(636220560010903584)
 
         del husker_list, member, follow, query_args
 
         print("Waiting for a tweet...")
 
-        # Iterate over the sample stream.
         for tweet in tweet_iter:
-            # You must test that your tweet has text. It might be a delete
-            # or data message.
+
             if tweet is None:
                 print("-- None --")
             elif tweet is Timeout:
@@ -85,11 +82,11 @@ class TTD(commands.Bot):
             elif tweet is Hangup:
                 print("-- Hangup --")
             elif tweet.get('text'):
-                # print(tweet['text'])
 
-                # Only pass tweets from uesrs in the list
                 if not tweet['user']['id_str'] in follow_str:
                     continue
+
+                print("Sending a tweet!")
 
                 try:
                     dt = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y')
