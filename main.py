@@ -147,4 +147,3 @@ client = TTD(
 )
 
 client.run(env_vars["DISCORD_TOKEN"])
-print("aa")
