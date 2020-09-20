@@ -47,28 +47,28 @@ class TTD(commands.Bot):
         # https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter
         # https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/guides/basic-stream-parameters
 
-        husker_list = twitter.lists.members(owner_screen_name="ayy_gbr", slug="Nebraska-Football-Coaches")
+        husker_coaches_list = twitter.lists.members(owner_screen_name="ayy_gbr", slug="Nebraska-Football-Coaches")
+        # husker_players_list = twitter.lists.members(owner_screen_name="ayy_gbr", slug="Nebraska-Football-Players")
+        husker_media_list = twitter.lists.members(owner_screen_name="ayy_gbr", slug="Husker-Media")
+        husker_lists = [husker_coaches_list, husker_media_list]
 
-        # A comma separated list of user IDs, indicating the users to return statuses for in the stream. See follow for more information.
         follow = []
-        for member in husker_list['users']:
-            follow.append(member["id_str"])
+        for list in husker_lists:
+            for member in list['users']:
+                follow.append(member["id_str"])
         follow_str = ",".join(follow)
 
+        # track_str = "#huskers #gbr #b1g #bigten"
         query_args = dict()
         query_args["follow"] = follow_str
-
-        # Keywords to track. Phrases of keywords are specified by a comma-separated list. See track for more information.
-        query_args["track"] = "#huskers #gbr #b1g #bigten"
-
+        # query_args["track"] = track_str
         query_args["language"] = "en"
 
         stream = TwitterStream(auth=auth, **stream_args)
         tweet_iter = stream.statuses.filter(**query_args)
-
         chan = client.get_channel(636220560010903584)
 
-        del husker_list, member, follow, query_args
+        del husker_coaches_list, husker_media_list, husker_lists, member, follow, query_args
 
         print("Waiting for a tweet...")
 
@@ -84,7 +84,9 @@ class TTD(commands.Bot):
                 print("-- Hangup --")
             elif tweet.get('text'):
 
-                if not tweet['user']['id_str'] in follow_str:
+                tweet_author = tweet["user"]["screen_name"]
+                if tweet_author not in follow_str:
+                    print(f"Skipping tweet from [ @{tweet_author} ]")
                     continue
 
                 print("Sending a tweet!")
@@ -150,12 +152,15 @@ elif "Linux" in pltfm:
 
 if not path.exists("key.key"):
     encrypt.write_key()
-    key = encrypt.load_key()
+    key = encrypt.load_key(key_path)
     encrypt.encrypt(env_file, key)
 else:
-    key = encrypt.load_key()
+    key = encrypt.load_key(key_path)
 
 env_vars = encrypt.decrypt_return_data(env_file, key)
+
+# from pprint import pprint
+# pprint(env_vars)
 
 del key, env_file, key_path
 

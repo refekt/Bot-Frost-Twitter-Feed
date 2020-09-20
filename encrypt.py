@@ -14,11 +14,11 @@ def write_key():
         key_file.write(key)
 
 
-def load_key():
+def load_key(path):
     """
     Loads the key from the current directory named `key.key`
     """
-    return open("key.key", "rb").read()
+    return open(path, "rb").read()
 
 
 def encrypt(filename, key):
