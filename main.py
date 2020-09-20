@@ -1,3 +1,4 @@
+import platform
 from datetime import datetime
 from os import path
 
@@ -136,7 +137,13 @@ class TTD(commands.Bot):
         await client.logout()
 
 
-env_file = "./vars.json"
+pltfm = platform.platform()
+env_file = None
+
+if "Windows" in pltfm:
+    env_file = "vars.json"
+elif "Linux" in pltfm:
+    env_file = "/home/botfrosttwitter/bot/vars.json"
 
 if not path.exists("key.key"):
     encrypt.write_key()
