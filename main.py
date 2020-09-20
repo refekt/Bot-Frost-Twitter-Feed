@@ -159,6 +159,8 @@ else:
 
 env_vars = encrypt.decrypt_return_data(env_file, key)
 
+del key, env_file, key_path
+
 client = TTD(
     command_prefix="+",
 )
