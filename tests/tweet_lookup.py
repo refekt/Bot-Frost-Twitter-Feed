@@ -1,4 +1,5 @@
 import pathlib
+from pprint import pprint
 
 from twitter import Twitter
 from twitter.oauth import OAuth
@@ -26,4 +27,4 @@ twitter = Twitter(
 
 tweet = twitter.statuses.oembed(_id=1307688583201947649)
 
-print(tweet)
+pprint(tweet)

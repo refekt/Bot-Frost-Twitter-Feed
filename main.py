@@ -125,6 +125,11 @@ class TTD(commands.Bot):
                     print("-- Some data: " + str(tweet))
         except TwitterHTTPError as e:
             print(e)
+            print("Waiting 15 minutes and then restarting")
+            import time
+            time.sleep(15 * 60)
+            print("Restarting the twitter stream")
+            await self.start_twitter_stream()
 
     async def on_ready(self):
         print("Starting the Twitter stream.")

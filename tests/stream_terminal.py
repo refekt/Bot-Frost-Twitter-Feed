@@ -72,7 +72,7 @@ def start_twitter_stream():
 
         for tweet in tweet_iter:
 
-            print(tweet.rate_limit_remaining())
+            print(tweet)
 
             if tweet is None:
                 print("-- None --")
@@ -105,6 +105,11 @@ def start_twitter_stream():
                 print("-- Some data: " + str(tweet))
     except TwitterHTTPError as e:
         print(e)
+        print("Waiting 15 minutes and then restarting")
+        import time
+        time.sleep(15 * 60)
+        print("Restarting the twitter stream")
+        start_twitter_stream()
 
 
 def main():
