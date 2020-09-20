@@ -139,11 +139,14 @@ class TTD(commands.Bot):
 
 pltfm = platform.platform()
 env_file = None
+key_path = None
 
 if "Windows" in pltfm:
     env_file = "vars.json"
+    key_path = "key.key"
 elif "Linux" in pltfm:
     env_file = "/home/botfrosttwitter/bot/vars.json"
+    key_path = "/home/botfrosttwitter/bot/key.key"
 
 if not path.exists("key.key"):
     encrypt.write_key()
