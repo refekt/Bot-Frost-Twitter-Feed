@@ -148,8 +148,6 @@ elif "Linux" in pltfm:
     env_file = "/home/botfrosttwitter/bot/vars.json"
     key_path = "/home/botfrosttwitter/bot/key.key"
 
-print(repr(env_file), repr(key_path))
-
 if not path.exists("key.key"):
     encrypt.write_key()
     key = encrypt.load_key()
