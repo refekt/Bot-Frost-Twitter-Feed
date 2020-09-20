@@ -128,3 +128,6 @@ idea/*
 
 key.key
 vars.json
+
+.gitattributes
+.gitignore
