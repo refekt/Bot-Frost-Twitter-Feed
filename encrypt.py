@@ -18,7 +18,6 @@ def load_key(path):
     """
     Loads the key from the current directory named `key.key`
     """
-    print(f"Loading [ {path}] key!")
     return open(path, "rb").read()
 
 

@@ -1,16 +1,15 @@
 import json
-import platform
-from datetime import datetime
-from os import path
+import logging
 
-from discord import Embed
-from discord.ext import commands
-
-import encrypt
 import tweepy
-from tweepy import API, Stream, OAuthHandler
 
-members_following = []
+from main import send_tweet_to_discord
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class TwitterUser:
@@ -57,6 +56,14 @@ class TwitterUser:
         self.notifications = notifications
 
 
+class UserMentions:
+    def __init__(self, screen_name, name, _id, id_str):
+        self.screen_name = screen_name
+        self.name = name
+        self.id = _id
+        self.id_str = id_str
+
+
 class TweetEntities:
 
     def __init__(self, hashtags, urls, user_mentions, symbols):
@@ -73,12 +80,7 @@ class Tweet:
         self.id = _id
         self.id_str = id_str
         self.text = text
-        if "iPhone" in source:
-            self.source = "iPhone"
-        elif "Android" in source:
-            self.source = "Android"
-        else:
-            self.source = "Other"
+        self.source = source
         self.truncated = truncated
         self.in_reply_to_status_id = in_reply_to_status_id
         self.in_reply_to_status_id_str = in_reply_to_status_id_str
@@ -101,79 +103,6 @@ class Tweet:
         self.filter_level = filter_level
         self.lang = lang
         self.timestamp_ms = timestamp_ms
-        self.url = f"https://twitter.com/{self.user.screen_name}/status/{self.id}"
-
-
-class TwitterStreamListener(tweepy.StreamListener):
-
-    def on_status(self, status):
-        print("*~~> on_status", status)
-
-    def on_connect(self):
-        print("*~~> Twitter Stream started!")
-
-    async def on_data(self, raw_data):
-        raw_data = json.loads(raw_data)
-
-        try:
-            raw_data["user"].get("id")
-        except KeyError:
-            return
-
-        tweet = build_tweet(raw_data)
-
-        if tweet.user.id_str not in members_following:
-            print("*~~> Skipping tweet!")
-            return
-
-        print("*~~> Sending tweet to Discord")
-
-        await send_tweet_to_discord(tweet)
-
-    def on_delete(self, status_id, user_id):
-        print("*~~> on_delete", status_id, user_id)
-
-    def on_direct_message(self, status):
-        print("*~~> on_direct_message", status)
-
-    def on_disconnect(self, notice):
-        print("*~~> on_disconnect", notice)
-
-    def on_error(self, status_code):
-        if status_code == 401:
-            print("*~~> Status Code: 401. Unable to authenticate. Turning off!")
-            import sys
-            sys.exit()
-        else:
-            print(f"*~~> Status Code: {status_code}. Attempting to restart...")
-            return True
-
-    def on_event(self, status):
-        print("*~~> on_event", status)
-
-    def on_exception(self, exception):
-        print("*~~> on_exception", exception)
-
-    def on_friends(self, friends):
-        print("*~~> on_friends")
-
-    def on_limit(self, track):
-        print("*~~> on_limit", track)
-
-    def on_scrub_geo(self, notice):
-        print("*~~> on_scrub_geo", notice)
-
-    def on_status_withheld(self, notice):
-        print("*~~> on_status_withheld", notice)
-
-    def on_timeout(self):
-        print("*~~> on_timeout")
-
-    def on_user_withheld(self, notice):
-        print("*~~> on_user_withheld", notice)
-
-    def on_warning(self, notice):
-        print("*~~> on_warning")
 
 
 def build_tweet(rd):
@@ -254,134 +183,68 @@ def build_tweet(rd):
     return tweet
 
 
-async def send_tweet_to_discord(tweet: Tweet):
-    channel = client.get_channel(id=636220560010903584)  # Twitter
-    # channel = client.get_channel(id=593984711706279937)  # Spam
+class TwitterStreamListener(tweepy.StreamListener):
 
-    try:
-        dt = datetime.strptime(tweet.created_at, '%a %b %d %H:%M:%S %z %Y')
-    except KeyError:
-        dt = datetime.now()
+    def on_status(self, status):
+        logger.info("*~~> on_status", status)
 
-    tweet_embed = Embed(
-        title=f"Bot Frost Twitter Feed #GBR",
-        color=0xD00000,
-        timestamp=dt
-    )
-    tweet_embed.add_field(
-        name="Tweet",
-        value=tweet.text,
-        inline=False
-    )
-    tweet_embed.add_field(
-        name="Link",
-        value=f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id}",
-        inline=False
-    )
-    tweet_embed.set_author(
-        name=f"{tweet.user.name} (@{tweet.user.screen_name}) via {tweet.source}",
-        icon_url=tweet.user.profile_image_url
-    )
-    tweet_embed.set_footer(
-        text=f"{dt.strftime('%B %d, %Y at %H:%M%p')} | 🎈 = General 🌽 = Scott's Tots",
-        icon_url="https://i.imgur.com/Ah3x5NA.png"
-    )
+    def on_connect(self):
+        logger.info("*~~> on_connect")
 
-    tweet_message = await channel.send(embed=tweet_embed)
-    reactions = ("🎈", "🌽")
+    def on_data(self, raw_data):
+        raw_data = json.loads(raw_data)
 
-    for reaction in reactions:
-        await tweet_message.add_reaction(reaction)
+        try:
+            raw_data["user"].get("id")
+        except KeyError:
+            return
 
-
-class TTD(commands.Bot):
-
-    async def on_ready(self):
-        print("*~~> Initializing the OAuth Handler")
-        c_k = env_vars["TWITTER_CONSUMER_KEY"]
-        c_s = env_vars["TWITTER_CONSUMER_SECRET"]
-        auth = OAuthHandler(
-            consumer_key=c_k,
-            consumer_secret=c_s
+        send_tweet_to_discord(
+            build_tweet(
+                raw_data
+            )
         )
 
-        print("*~~> Setting access token")
+    def on_delete(self, status_id, user_id):
+        logger.info("*~~> on_delete", status_id, user_id)
 
-        k = env_vars["TWITTER_TOKEN_KEY"]
-        s = env_vars["TWITTER_TOKEN_SECRET"]
-        auth.set_access_token(
-            key=k,
-            secret=s
-        )
+    def on_direct_message(self, status):
+        logger.info("*~~> on_direct_message", status)
 
-        print("*~~> Initializing the API")
+    def on_disconnect(self, notice):
+        logger.info("*~~> on_disconnect", notice)
 
-        api = API(auth)
+    def on_error(self, status_code):
+        if status_code == 401:
+            logger.info("*~~> Status Code: 401. Unable to authenticate!")
+            import sys
+            sys.exit()
+        else:
+            logger.info("*~~> on_error", status_code)
 
-        print("*~~> Initializing the Stream")
+    def on_event(self, status):
+        logger.info("*~~> on_event", status)
 
-        listener = TwitterStreamListener()
-        stream = Stream(
-            auth=auth,
-            listener=listener
-        )
+    def on_exception(self, exception):
+        logger.info("*~~> on_exception", exception)
 
-        print("*~~> Creating filters")
+    def on_friends(self, friends):
+        logger.info("*~~> on_friends")
 
-        global members_following
+    def on_limit(self, track):
+        logger.info("*~~> on_limit", track)
 
-        media_list = api.list_members(
-            list_id=1307680291285278720
-        )
-        for member in media_list:
-            members_following.append(member.id_str)
+    def on_scrub_geo(self, notice):
+        logger.info("*~~> on_scrub_geo", notice)
 
-        coaches_list = api.list_members(
-            list_id=1223689242896977922
-        )
-        for coach in coaches_list:
-            members_following.append(coach.id_str)
+    def on_status_withheld(self, notice):
+        logger.info("*~~> on_status_withheld", notice)
 
-        print(f"*~~> Media members: {[member for member in members_following]}")
+    def on_timeout(self):
+        logger.info("*~~> on_timeout")
 
-        # tracking = [
-        #     "#huskers",
-        #     "nebraska",
-        #     "cornhuskers"
-        # ]
-        #
-        # print(f"*~~> Keywords: {[keyword for keyword in tracking]}")
+    def on_user_withheld(self, notice):
+        logger.info("*~~> on_user_withheld", notice)
 
-        await stream.filter(follow=members_following)
-
-
-pltfm = platform.platform()
-env_file = None
-key_path = None
-
-print("*~~> Establishing environment variables")
-
-if "Windows" in pltfm:
-    env_file = "vars.json"
-    key_path = "key.key"
-elif "Linux" in pltfm:
-    env_file = "/home/botfrosttwitter/bot/vars.json"
-    key_path = "/home/botfrosttwitter/bot/key.key"
-
-print("*~~> Loading encryption key")
-
-if not path.exists(key_path):
-    encrypt.write_key()
-    key = encrypt.load_key(key_path)
-    encrypt.encrypt(env_file, key)
-else:
-    key = encrypt.load_key(key_path)
-
-env_vars = encrypt.decrypt_return_data(env_file, key)
-
-del key, env_file, key_path, pltfm
-
-print("*~~> Starting Discord bot")
-
-client = TTD(command_prefix="+")
-client.run(env_vars["DISCORD_TOKEN"])
+    def on_warning(self, notice):
+        logger.info("*~~> on_warning")

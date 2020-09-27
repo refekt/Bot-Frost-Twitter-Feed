@@ -49,7 +49,7 @@ def start_twitter_stream():
         for member in list["users"]:
             follow.append(member["id_str"])
     follow_str = ",".join(follow)
-    track_str = ""
+    track_str = "trump"
 
     stream_args = dict(
         auth=auth,
@@ -61,7 +61,7 @@ def start_twitter_stream():
 
     try:
         query_args = dict(
-            follow=follow_str,
+            # follow=follow_str,
             track=track_str,
             language="en",
             retry=True
@@ -72,7 +72,9 @@ def start_twitter_stream():
 
         for tweet in tweet_iter:
 
-            print(tweet)
+            print("\tRL Limit:", tweet.get("rate_limit_limit"))
+            print("\tRL Remaining:", tweet.get("rate_limit_remaining"))
+            print("\tRL Reset:", tweet.get("rate_limit_reset"))
 
             if tweet is None:
                 print("-- None --")
@@ -85,10 +87,6 @@ def start_twitter_stream():
             elif tweet.get('text'):
 
                 tweet_author = tweet["user"]["screen_name"]
-                if tweet_author not in follow_str:
-                    print(f"Skipping tweet from [ @{tweet_author} ]")
-                    continue
-
                 print("Sending a tweet!")
 
                 try:
@@ -96,11 +94,9 @@ def start_twitter_stream():
                 except KeyError:
                     dt = datetime.now()
 
-                tweet_str = f"Author: @{tweet['user']['screen_name']}\n" \
-                            f"Link: https://twitter.com/{tweet['user']['screen_name']}/status/{tweet[id]}\n" \
-                            f"Text: {tweet['text']}\n" \
-                            f"Created At: {dt.strftime('%B %d, %Y at %H:%M%p')}"
-                print(tweet_str)
+                print(f"Author: @{tweet['user']['screen_name']}")
+                print(f"Link: https://twitter.com/{tweet['user']['screen_name']}/status/{tweet['id']}")
+                print(f"Text: {tweet['text']}\nCreated At: {dt.strftime('%B %d, %Y at %H:%M%p')}")
             else:
                 print("-- Some data: " + str(tweet))
     except TwitterHTTPError as e:
