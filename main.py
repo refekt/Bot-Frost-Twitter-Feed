@@ -74,11 +74,11 @@ class Tweet:
         self.id_str = id_str
         self.text = text
         if "iPhone" in source:
-            self.source = "iPhone"
+            self.source = "📱 iPhone"
         elif "Android" in source:
-            self.source = "Android"
+            self.source = "📱 Android"
         else:
-            self.source = "Other"
+            self.source = "💻 Web"
         self.truncated = truncated
         self.in_reply_to_status_id = in_reply_to_status_id
         self.in_reply_to_status_id_str = in_reply_to_status_id_str
@@ -123,7 +123,7 @@ class TwitterStreamListener(tweepy.StreamListener):
         tweet = build_tweet(raw_data)
 
         if tweet.user.id_str not in members_following:
-            print(f"*~ {datetime.now()} ~> Skipping tweet!")
+            print(f"*~ {datetime.now()} ~> Skipping tweet from @{tweet.user.screen_name}!")
             return
 
         print(f"*~ {datetime.now()} ~> Sending tweet to Discord")
@@ -264,9 +264,13 @@ async def send_tweet_to_discord(tweet: Tweet):
         dt = datetime.now()
 
     tweet_embed = Embed(
-        title=f"Bot Frost Twitter Feed #GBR",
+        # title=f"Bot Frost Twitter Feed #GBR",
         color=0xD00000,
         timestamp=dt
+    )
+    tweet_embed.set_author(
+        name=f"{tweet.user.name[:25]} (@{tweet.user.screen_name}) via {tweet.source}",
+        icon_url=tweet.user.profile_image_url
     )
     tweet_embed.add_field(
         name="Tweet",
@@ -278,9 +282,15 @@ async def send_tweet_to_discord(tweet: Tweet):
         value=f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id}",
         inline=False
     )
-    tweet_embed.set_author(
-        name=f"{tweet.user.name} (@{tweet.user.screen_name}) via {tweet.source}",
-        icon_url=tweet.user.profile_image_url
+    tweet_embed.add_field(
+        name="Retweets",
+        value=tweet.retweet_count,
+        inline=True
+    )
+    tweet_embed.add_field(
+        name="Likes",
+        value=tweet.favorite_count,
+        inline=True
     )
     tweet_embed.set_footer(
         text=f"{dt.strftime('%B %d, %Y at %H:%M%p')} | 🎈 = General 🌽 = Scott's Tots",
@@ -328,7 +338,7 @@ class TTD(commands.Bot):
 
         print("*~~> Creating filters")
 
-        global members_following
+        members_following = []
 
         media_list = api.list_members(
             list_id=1307680291285278720
@@ -346,13 +356,13 @@ class TTD(commands.Bot):
 
         # tracking = [
         #     "#huskers",
-        #     "nebraska",
-        #     "cornhuskers"
+        #     "#gbr",
+        #     "nebraska"
         # ]
         #
         # print(f"*~~> Keywords: {[keyword for keyword in tracking]}")
 
-        await stream.filter(follow=members_following)
+        await stream.filter(follow=members_following)  # track=tracking)
 
 
 pltfm = platform.platform()
@@ -384,4 +394,5 @@ del key, env_file, key_path, pltfm
 print("*~~> Starting Discord bot")
 
 client = TTD(command_prefix="+")
+
 client.run(env_vars["DISCORD_TOKEN"])
