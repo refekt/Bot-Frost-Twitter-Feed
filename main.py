@@ -338,7 +338,7 @@ class TTD(commands.Bot):
 
         print("*~~> Creating filters")
 
-        members_following = []
+        global members_following
 
         media_list = api.list_members(
             list_id=1307680291285278720
