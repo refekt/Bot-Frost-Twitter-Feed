@@ -115,6 +115,7 @@ class TwitterStreamListener(tweepy.StreamListener):
     async def on_data(self, raw_data):
         raw_data = json.loads(raw_data)
 
+        # Some random tweet would come through and break the code
         try:
             raw_data["user"].get("id")
         except KeyError:
@@ -141,9 +142,17 @@ class TwitterStreamListener(tweepy.StreamListener):
 
     def on_error(self, status_code):
         if status_code == 401:
-            print("*~~> Status Code: 401. Unable to authenticate. Turning off!")
             import sys
+
+            print("*~~> Status Code: 401. Unable to authenticate. Turning off!")
             sys.exit()
+        elif status_code == 420:
+            import time
+            minutes_to_sleep = 5
+            print(f"*~ {datetime.now()} ~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
+            time.sleep(60 * minutes_to_sleep)
+            print(f"*~ {datetime.now()} ~> Restarting the Twitter stream...")
+            return True
         else:
             print(f"*~~> Status Code: {status_code}. Attempting to restart...")
             return True
@@ -326,7 +335,11 @@ class TTD(commands.Bot):
 
         print("*~~> Initializing the API")
 
-        api = API(auth)
+        api = API(
+            auth_handler=auth,
+            wait_on_rate_limit_notify=True,
+            wait_on_rate_limit=True
+        )
 
         print("*~~> Initializing the Stream")
 
