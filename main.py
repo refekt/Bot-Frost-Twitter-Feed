@@ -123,10 +123,10 @@ class TwitterStreamListener(tweepy.StreamListener):
         tweet = build_tweet(raw_data)
 
         if tweet.user.id_str not in members_following:
-            print("*~~> Skipping tweet!")
+            print(f"*~ {datetime.now()} ~> Skipping tweet!")
             return
 
-        print("*~~> Sending tweet to Discord")
+        print(f"*~ {datetime.now()} ~> Sending tweet to Discord")
 
         await send_tweet_to_discord(tweet)
 
