@@ -418,7 +418,6 @@ class Stream(object):
             self.session.params['locations'] = ','.join(['%.2f' % l for l in locations])
         if track:
             self.session.params['track'] = u','.join(track).encode(encoding)
-
         self._start(is_async)
 
     def firehose(self, count=None, is_async=False):

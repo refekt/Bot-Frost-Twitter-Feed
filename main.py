@@ -11,6 +11,7 @@ import tweepy
 from tweepy import API, Stream, OAuthHandler
 
 members_following = []
+api = API()
 
 
 class TwitterUser:
@@ -115,11 +116,15 @@ class TwitterStreamListener(tweepy.StreamListener):
     async def on_data(self, raw_data):
         raw_data = json.loads(raw_data)
 
+        # Limit messages
+        if raw_data.get("limit"):
+            return print(raw_data)
+
         # Some random tweet would come through and break the code
-        try:
-            raw_data["user"].get("id")
-        except KeyError:
-            return
+        # try:
+        #     raw_data["user"].get("id")
+        # except KeyError:
+        #     return
 
         tweet = build_tweet(raw_data)
 
@@ -147,6 +152,8 @@ class TwitterStreamListener(tweepy.StreamListener):
             print("*~~> Status Code: 401. Unable to authenticate. Turning off!")
             sys.exit()
         elif status_code == 420:
+            rate_limit_status = api.rate_limit_status()
+
             import time
             minutes_to_sleep = 5
             print(f"*~ {datetime.now()} ~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
@@ -335,6 +342,7 @@ class TTD(commands.Bot):
 
         print("*~~> Initializing the API")
 
+        global api
         api = API(
             auth_handler=auth,
             wait_on_rate_limit_notify=True,
@@ -375,7 +383,12 @@ class TTD(commands.Bot):
         #
         # print(f"*~~> Keywords: {[keyword for keyword in tracking]}")
 
-        await stream.filter(follow=members_following)  # track=tracking)
+        print("*~~> Starting Twitter stream...")
+
+        await stream.filter(
+            follow=members_following,
+            filter_level="low"
+        )
 
 
 pltfm = platform.platform()
