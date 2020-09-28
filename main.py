@@ -298,16 +298,16 @@ async def send_tweet_to_discord(tweet: Tweet):
         value=f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id}",
         inline=False
     )
-    tweet_embed.add_field(
-        name="Retweets",
-        value=tweet.retweet_count,
-        inline=True
-    )
-    tweet_embed.add_field(
-        name="Likes",
-        value=tweet.favorite_count,
-        inline=True
-    )
+    # tweet_embed.add_field(
+    #     name="Retweets",
+    #     value=tweet.retweet_count,
+    #     inline=True
+    # )
+    # tweet_embed.add_field(
+    #     name="Likes",
+    #     value=tweet.favorite_count,
+    #     inline=True
+    # )
     tweet_embed.set_footer(
         text=f"{dt.strftime('%B %d, %Y at %H:%M%p')} | 🎈 = General 🌽 = Scott's Tots",
         icon_url="https://i.imgur.com/Ah3x5NA.png"
@@ -386,8 +386,7 @@ class TTD(commands.Bot):
         print("*~~> Starting Twitter stream...")
 
         await stream.filter(
-            follow=members_following,
-            filter_level="low"
+            follow=members_following
         )
 
 
