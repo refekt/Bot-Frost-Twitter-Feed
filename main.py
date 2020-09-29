@@ -121,10 +121,10 @@ class TwitterStreamListener(tweepy.StreamListener):
             return print(raw_data)
 
         # Some random tweet would come through and break the code
-        # try:
-        #     raw_data["user"].get("id")
-        # except KeyError:
-        #     return
+        try:
+            raw_data["user"].get("id")
+        except KeyError:
+            return
 
         tweet = build_tweet(raw_data)
 
@@ -132,7 +132,7 @@ class TwitterStreamListener(tweepy.StreamListener):
             print(f"*~ {datetime.now()} ~> Skipping tweet from @{tweet.user.screen_name}!")
             return
 
-        print(f"*~ {datetime.now()} ~> Sending tweet to Discord")
+        print(f"*~ {datetime.now()} ~> Sending tweet from @{tweet.user.screen_name} to Discord")
 
         await send_tweet_to_discord(tweet)
 
@@ -323,6 +323,8 @@ async def send_tweet_to_discord(tweet: Tweet):
 class TTD(commands.Bot):
 
     async def on_ready(self):
+        return
+
         print("*~~> Initializing the OAuth Handler")
         c_k = env_vars["TWITTER_CONSUMER_KEY"]
         c_s = env_vars["TWITTER_CONSUMER_SECRET"]
@@ -419,5 +421,20 @@ del key, env_file, key_path, pltfm
 print("*~~> Starting Discord bot")
 
 client = TTD(command_prefix="+")
+
+
+def is_owner():
+    async def predicate(ctx):
+        return ctx.author.id == 189554873778307073
+
+    return commands.check(predicate)
+
+
+@client.command(aliases=["q", ], hidden=True)
+@is_owner()
+async def bye(ctx):
+    await ctx.send("Good bye!")
+    await client.logout()
+
 
 client.run(env_vars["DISCORD_TOKEN"])
