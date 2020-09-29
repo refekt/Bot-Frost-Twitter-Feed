@@ -323,8 +323,6 @@ async def send_tweet_to_discord(tweet: Tweet):
 class TTD(commands.Bot):
 
     async def on_ready(self):
-        return
-
         print("*~~> Initializing the OAuth Handler")
         c_k = env_vars["TWITTER_CONSUMER_KEY"]
         c_s = env_vars["TWITTER_CONSUMER_SECRET"]
