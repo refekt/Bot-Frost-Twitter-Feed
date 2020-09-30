@@ -279,6 +279,12 @@ async def send_tweet_to_discord(tweet: Tweet):
     except KeyError:
         dt = datetime.now()
 
+    general_chan_id = 440868279150444544
+    recruiting_chan_id = 507520543096832001
+
+    general_chan = client.get_channel(id=general_chan_id)
+    recruiting_chan = client.get_channel(id=recruiting_chan_id)
+
     tweet_embed = Embed(
         # title=f"Bot Frost Twitter Feed #GBR",
         color=0xD00000,
@@ -298,18 +304,14 @@ async def send_tweet_to_discord(tweet: Tweet):
         value=f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id}",
         inline=False
     )
-    # tweet_embed.add_field(
-    #     name="Retweets",
-    #     value=tweet.retweet_count,
-    #     inline=True
-    # )
-    # tweet_embed.add_field(
-    #     name="Likes",
-    #     value=tweet.favorite_count,
-    #     inline=True
-    # )
+    tweet_embed.add_field(
+        name="Share This Tweet!",
+        value=f"React with 🎈 to send to {general_chan.mention}\n"
+              f"React with 🌽 to send to {recruiting_chan.mention}",
+        inline=False
+    )
     tweet_embed.set_footer(
-        text=f"{dt.strftime('%B %d, %Y at %H:%M%p')} | 🎈 = General 🌽 = Scott's Tots",
+        text=f"Tweet created on {dt.strftime('%B %d, %Y at %H:%M%p')}",
         icon_url="https://i.imgur.com/Ah3x5NA.png"
     )
 
