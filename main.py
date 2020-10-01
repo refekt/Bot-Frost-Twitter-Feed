@@ -414,6 +414,11 @@ if not path.exists(key_path):
 else:
     key = encrypt.load_key(key_path)
 
+# Debugging purposes only
+# from encrypt import decrypt, encrypt
+# decrypt(env_file, key)
+# encrypt(env_file, key)
+
 env_vars = encrypt.decrypt_return_data(env_file, key)
 
 del key, env_file, key_path, pltfm
