@@ -306,8 +306,7 @@ async def send_tweet_to_discord(tweet: Tweet):
     )
     tweet_embed.add_field(
         name="Share This Tweet!",
-        value=f"React with 🎈 to send to {general_chan.mention}\n"
-              f"React with 🌽 to send to {recruiting_chan.mention}",
+        value=f"React with 🎈 to send to {general_chan.mention} or 🌽 to send to {recruiting_chan.mention}",
         inline=False
     )
     tweet_embed.set_footer(
