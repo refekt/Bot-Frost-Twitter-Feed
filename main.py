@@ -288,7 +288,7 @@ async def send_tweet_to_discord(tweet: Tweet):
     tweet_embed = Embed(
         # title=f"Bot Frost Twitter Feed #GBR",
         color=0xD00000,
-        timestamp=dt
+        # timestamp=dt
     )
     tweet_embed.set_author(
         name=f"{tweet.user.name[:25]} (@{tweet.user.screen_name}) via {tweet.source}",
