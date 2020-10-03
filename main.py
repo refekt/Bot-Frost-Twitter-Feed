@@ -3,7 +3,7 @@ import platform
 from datetime import datetime
 from os import path
 
-from discord import Embed
+from discord import Embed, Intents
 from discord.ext import commands
 
 import encrypt
@@ -423,6 +423,11 @@ env_vars = encrypt.decrypt_return_data(env_file, key)
 del key, env_file, key_path, pltfm
 
 print("*~~> Starting Discord bot")
+
+client_intents = Intents()
+client_intents.members = True
+client_intents.messages = True
+client_intents.guilds = True
 
 client = TTD(command_prefix="+")
 
