@@ -152,16 +152,11 @@ class TwitterStreamListener(tweepy.StreamListener):
             print("*~~> Status Code: 401. Unable to authenticate. Turning off!")
             sys.exit()
         elif status_code == 420:
-            rate_limit_status = api.rate_limit_status()
-
             import time
             minutes_to_sleep = 5
             print(f"*~ {datetime.now()} ~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
             time.sleep(60 * minutes_to_sleep)
             print(f"*~ {datetime.now()} ~> Restarting the Twitter stream...")
-            return True
-        else:
-            print(f"*~~> Status Code: {status_code}. Attempting to restart...")
             return True
 
     def on_event(self, status):
