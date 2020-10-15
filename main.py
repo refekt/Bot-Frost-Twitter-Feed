@@ -1,3 +1,4 @@
+import logging
 import json
 import platform
 from datetime import datetime
@@ -12,6 +13,12 @@ from tweepy import API, Stream, OAuthHandler
 
 members_following = []
 api = API()
+
+logger = logging.getLogger('main')
+logger.setLevel(logging.INFO)
+handler = logging.FileHandler(filename='bot.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 
 
 class TwitterUser:
@@ -108,17 +115,17 @@ class Tweet:
 class TwitterStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
-        print("*~~> on_status", status)
+        logger.info(f"*~~> on_status: status")
 
     def on_connect(self):
-        print("*~~> Twitter Stream started!")
+        logger.info("*~~> Twitter Stream started!")
 
     async def on_data(self, raw_data):
         raw_data = json.loads(raw_data)
 
         # Limit messages
         if raw_data.get("limit"):
-            return print(raw_data)
+            return logger.info(raw_data)
 
         # Some random tweet would come through and break the code
         try:
@@ -129,62 +136,62 @@ class TwitterStreamListener(tweepy.StreamListener):
         tweet = build_tweet(raw_data)
 
         if tweet.user.id_str not in members_following:
-            print(f"*~ {datetime.now()} ~> Skipping tweet from @{tweet.user.screen_name}!")
+            logger.info(f"*~ {datetime.now()} ~> Skipping tweet from @{tweet.user.screen_name}!")
             return
 
-        print(f"*~ {datetime.now()} ~> Sending tweet from @{tweet.user.screen_name} to Discord")
+        logger.info(f"*~ {datetime.now()} ~> Sending tweet from @{tweet.user.screen_name} to Discord")
 
         await send_tweet_to_discord(tweet)
 
     def on_delete(self, status_id, user_id):
-        print("*~~> on_delete", status_id, user_id)
+        logger.info("*~~> on_delete", status_id, user_id)
 
     def on_direct_message(self, status):
-        print("*~~> on_direct_message", status)
+        logger.info("*~~> on_direct_message", status)
 
     def on_disconnect(self, notice):
-        print("*~~> on_disconnect", notice)
+        logger.info("*~~> on_disconnect", notice)
 
     def on_error(self, status_code):
         if status_code == 401:
             import sys
 
-            print("*~~> Status Code: 401. Unable to authenticate. Turning off!")
+            logger.info("*~~> Status Code: 401. Unable to authenticate. Turning off!")
             sys.exit()
         elif status_code == 420:
             import time
             minutes_to_sleep = 5
-            print(f"*~ {datetime.now()} ~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
+            logger.info(f"*~ {datetime.now()} ~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
             time.sleep(60 * minutes_to_sleep)
-            print(f"*~ {datetime.now()} ~> Restarting the Twitter stream...")
+            logger.info(f"*~ {datetime.now()} ~> Restarting the Twitter stream...")
             return True
 
     def on_event(self, status):
-        print("*~~> on_event", status)
+        logger.info("*~~> on_event", status)
 
     def on_exception(self, exception):
-        print("*~~> on_exception", exception)
+        logger.info("*~~> on_exception", exception)
 
     def on_friends(self, friends):
-        print("*~~> on_friends")
+        logger.info("*~~> on_friends")
 
     def on_limit(self, track):
-        print("*~~> on_limit", track)
+        logger.info("*~~> on_limit", track)
 
     def on_scrub_geo(self, notice):
-        print("*~~> on_scrub_geo", notice)
+        logger.info("*~~> on_scrub_geo", notice)
 
     def on_status_withheld(self, notice):
-        print("*~~> on_status_withheld", notice)
+        logger.info("*~~> on_status_withheld", notice)
 
     def on_timeout(self):
-        print("*~~> on_timeout")
+        logger.info("*~~> on_timeout")
 
     def on_user_withheld(self, notice):
-        print("*~~> on_user_withheld", notice)
+        logger.info("*~~> on_user_withheld", notice)
 
     def on_warning(self, notice):
-        print("*~~> on_warning")
+        logger.info("*~~> on_warning")
 
 
 def build_tweet(rd):
@@ -319,7 +326,7 @@ async def send_tweet_to_discord(tweet: Tweet):
 class TTD(commands.Bot):
 
     async def on_ready(self):
-        print("*~~> Initializing the OAuth Handler")
+        logger.info("*~~> Initializing the OAuth Handler")
         c_k = env_vars["TWITTER_CONSUMER_KEY"]
         c_s = env_vars["TWITTER_CONSUMER_SECRET"]
         auth = OAuthHandler(
@@ -327,7 +334,7 @@ class TTD(commands.Bot):
             consumer_secret=c_s
         )
 
-        print("*~~> Setting access token")
+        logger.info("*~~> Setting access token")
 
         k = env_vars["TWITTER_TOKEN_KEY"]
         s = env_vars["TWITTER_TOKEN_SECRET"]
@@ -336,7 +343,7 @@ class TTD(commands.Bot):
             secret=s
         )
 
-        print("*~~> Initializing the API")
+        logger.info("*~~> Initializing the API")
 
         global api
         api = API(
@@ -345,7 +352,7 @@ class TTD(commands.Bot):
             wait_on_rate_limit=True
         )
 
-        print("*~~> Initializing the Stream")
+        logger.info("*~~> Initializing the Stream")
 
         listener = TwitterStreamListener()
         stream = Stream(
@@ -353,7 +360,7 @@ class TTD(commands.Bot):
             listener=listener
         )
 
-        print("*~~> Creating filters")
+        logger.info("*~~> Creating filters")
 
         global members_following
 
@@ -369,7 +376,7 @@ class TTD(commands.Bot):
         for coach in coaches_list:
             members_following.append(coach.id_str)
 
-        print(f"*~~> Media members: {[member for member in members_following]}")
+        logger.info(f"*~~> Media members: {[member for member in members_following]}")
 
         # tracking = [
         #     "#huskers",
@@ -377,9 +384,9 @@ class TTD(commands.Bot):
         #     "nebraska"
         # ]
         #
-        # print(f"*~~> Keywords: {[keyword for keyword in tracking]}")
+        # logger.info(f"*~~> Keywords: {[keyword for keyword in tracking]}")
 
-        print("*~~> Starting Twitter stream...")
+        logger.info("*~~> Starting Twitter stream...")
 
         await stream.filter(
             follow=members_following
@@ -390,7 +397,7 @@ pltfm = platform.platform()
 env_file = None
 key_path = None
 
-print("*~~> Establishing environment variables")
+logger.info("*~~> Establishing environment variables")
 
 if "Windows" in pltfm:
     env_file = "vars.json"
@@ -399,7 +406,7 @@ elif "Linux" in pltfm:
     env_file = "/home/botfrosttwitter/bot/vars.json"
     key_path = "/home/botfrosttwitter/bot/key.key"
 
-print("*~~> Loading encryption key")
+logger.info("*~~> Loading encryption key")
 
 if not path.exists(key_path):
     encrypt.write_key()
@@ -417,7 +424,7 @@ env_vars = encrypt.decrypt_return_data(env_file, key)
 
 del key, env_file, key_path, pltfm
 
-print("*~~> Starting Discord bot")
+logger.info("*~~> Starting Discord bot")
 
 client_intents = Intents()
 client_intents.members = True
