@@ -14,7 +14,7 @@ from tweepy import API, Stream, OAuthHandler
 members_following = []
 api = API()
 
-logger = logging.getLogger('main')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 handler = logging.FileHandler(filename='bot.log', encoding='utf-8', mode='a')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
