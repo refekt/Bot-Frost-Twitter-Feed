@@ -136,10 +136,10 @@ class TwitterStreamListener(tweepy.StreamListener):
         tweet = build_tweet(raw_data)
 
         if tweet.user.id_str not in members_following:
-            logger.info(f"*~ {datetime.now()} ~> Skipping tweet from @{tweet.user.screen_name}!")
+            logger.info(f"*~~> Skipping tweet from @{tweet.user.screen_name}!")
             return
 
-        logger.info(f"*~ {datetime.now()} ~> Sending tweet from @{tweet.user.screen_name} to Discord")
+        logger.info(f"*~~> Sending tweet from @{tweet.user.screen_name} to Discord")
 
         await send_tweet_to_discord(tweet)
 
@@ -161,9 +161,9 @@ class TwitterStreamListener(tweepy.StreamListener):
         elif status_code == 420:
             import time
             minutes_to_sleep = 5
-            logger.info(f"*~ {datetime.now()} ~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
+            logger.info(f"*~~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
             time.sleep(60 * minutes_to_sleep)
-            logger.info(f"*~ {datetime.now()} ~> Restarting the Twitter stream...")
+            logger.info("*~~> Restarting the Twitter stream...")
             return True
 
     def on_event(self, status):
