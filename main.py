@@ -158,7 +158,7 @@ class TwitterStreamListener(tweepy.StreamListener):
 
             logger.info("*~~> Status Code: 401. Unable to authenticate. Turning off!")
             sys.exit()
-        elif status_code == 420:
+        else:  # elif status_code == 420:
             import time
             minutes_to_sleep = 5
             logger.info(f"*~~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
