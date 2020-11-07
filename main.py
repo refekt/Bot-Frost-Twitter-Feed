@@ -164,7 +164,7 @@ class TwitterStreamListener(tweepy.StreamListener):
             logger.info(f"*~~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
             time.sleep(60 * minutes_to_sleep)
             logger.info("*~~> Restarting the Twitter stream...")
-            return True
+            # return True  # Trying to remove duplicate streams
 
     def on_event(self, status):
         logger.info("*~~> on_event", status)
