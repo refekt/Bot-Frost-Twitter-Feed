@@ -164,7 +164,7 @@ class TwitterStreamListener(tweepy.StreamListener):
         #     logger.info(f"*~~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
         #     time.sleep(60 * minutes_to_sleep)
         #     logger.info("*~~> Restarting the Twitter stream...")
-            # return True  # Trying to remove duplicate streams
+        # return True  # Trying to remove duplicate streams
 
     def on_event(self, status):
         logger.info("*~~> on_event", status)
@@ -274,6 +274,7 @@ def build_tweet(rd):
 
 async def send_tweet_to_discord(tweet: Tweet):
     channel = client.get_channel(id=636220560010903584)  # Twitter
+    husker_gen = client.get_channel(id=440868279150444544)  # husker general
     # channel = client.get_channel(id=593984711706279937)  # Spam
 
     try:
@@ -316,11 +317,14 @@ async def send_tweet_to_discord(tweet: Tweet):
         icon_url="https://i.imgur.com/Ah3x5NA.png"
     )
 
-    tweet_message = await channel.send(embed=tweet_embed)
-    reactions = ("🎈", "🌽")
+    if not tweet.user.id == 2151130166:
+        tweet_message = await channel.send(embed=tweet_embed)
+        reactions = ("🎈", "🌽")
 
-    for reaction in reactions:
-        await tweet_message.add_reaction(reaction)
+        for reaction in reactions:
+            await tweet_message.add_reaction(reaction)
+    else:
+        await husker_gen.send(embed=tweet_embed)
 
 
 class TTD(commands.Bot):
@@ -426,10 +430,7 @@ del key, env_file, key_path, pltfm
 
 logger.info("*~~> Starting Discord bot")
 
-client_intents = Intents()
-client_intents.members = True
-client_intents.messages = True
-client_intents.guilds = True
+client_intents = Intents().all()
 
 client = TTD(command_prefix="+")
 
