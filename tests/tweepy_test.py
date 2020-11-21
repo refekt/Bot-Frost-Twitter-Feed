@@ -3,7 +3,7 @@ import logging
 
 import tweepy
 
-from main import send_tweet_to_discord
+from husker_twitter import send_tweet_to_discord
 
 logging.basicConfig(
     level=logging.INFO,

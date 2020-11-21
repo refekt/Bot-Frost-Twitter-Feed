@@ -158,12 +158,12 @@ class TwitterStreamListener(tweepy.StreamListener):
 
             logger.info("*~~> Status Code: 401. Unable to authenticate. Turning off!")
             sys.exit()
-        else:  # elif status_code == 420:
-            import time
-            minutes_to_sleep = 5
-            logger.info(f"*~~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
-            time.sleep(60 * minutes_to_sleep)
-            logger.info("*~~> Restarting the Twitter stream...")
+        # else:  # elif status_code == 420:
+        #     import time
+        #     minutes_to_sleep = 5
+        #     logger.info(f"*~~> Rate limit exceeded! Waiting {minutes_to_sleep} minutes...")
+        #     time.sleep(60 * minutes_to_sleep)
+        #     logger.info("*~~> Restarting the Twitter stream...")
             # return True  # Trying to remove duplicate streams
 
     def on_event(self, status):
